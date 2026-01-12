@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using LibreHardwareMonitor.Hardware;
-using MoBro.Plugin.LibreHardwareMonitor.Extensions;
-using MoBro.Plugin.LibreHardwareMonitor.Model;
 using MoBro.Plugin.SDK.Models;
 using MoBro.Plugin.SDK.Models.Metrics;
 using MoBro.Plugin.SDK.Services;
 
-namespace MoBro.Plugin.LibreHardwareMonitor;
+namespace MoBro.Plugin.LibreHardwareMonitor.Libre;
 
 public class LibreHardwareMonitor : IDisposable
 {

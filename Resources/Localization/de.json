@@ -20,5 +20,7 @@
   "settings.battery.desc": "Ob die Batterie überwacht werden soll",
   "settings.battery.title": "Batterie",
   "settings.delay.desc": "Optionale Verzögerung vor der Initialisierung und Abfrage der Sensoren (in Sekunden)",
-  "settings.delay.title": "Initialisierungsverzögerung"
+  "settings.delay.title": "Initialisierungsverzögerung",
+  "dependencies.pawnio.desc": "LibreHardwareMonitor verwendet PawnIO, um bestimmte Hardwaresensoren auszulesen. Ohne diesen Treiber stehen einige Metriken nicht zur Verfügung.",
+  "dependencies.pawnio.title": "PawnIO"
 }

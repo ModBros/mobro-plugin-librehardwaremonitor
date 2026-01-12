@@ -1,4 +1,6 @@
 ﻿using System;
+using Microsoft.Extensions.Logging;
+using MoBro.Plugin.LibreHardwareMonitor.Libre;
 using MoBro.Plugin.SDK;
 using MoBro.Plugin.SDK.Services;
 
@@ -14,14 +16,22 @@ public class Plugin : IMoBroPlugin, IDisposable
   private readonly IMoBroService _service;
   private readonly IMoBroScheduler _scheduler;
 
-  private readonly LibreHardwareMonitor _libre;
+  private readonly ILogger _logger;
 
-  public Plugin(IMoBroSettings settings, IMoBroService service, IMoBroScheduler scheduler)
+  private readonly Libre.LibreHardwareMonitor _libre;
+
+  public Plugin(
+    IMoBroSettings settings,
+    IMoBroService service,
+    IMoBroScheduler scheduler,
+    ILogger logger
+  )
   {
     _settings = settings;
     _service = service;
     _scheduler = scheduler;
-    _libre = new LibreHardwareMonitor();
+    _logger = logger;
+    _libre = new Libre.LibreHardwareMonitor();
   }
 
   public void Init()
@@ -32,13 +42,18 @@ public class Plugin : IMoBroPlugin, IDisposable
 
   private void InitLibre()
   {
+    // check PawnIO status 
+    _service.SetDependencyStatus("pawnio", PawnIo.GetStatus());
+
     // update LibreHardwareMonitor according to settings
+    _logger.LogInformation("Updating LibreHardwareMonitor settings");
     _libre.Update(_settings);
 
     // register groups and metrics
     _service.Register(_libre.GetMetricItems());
 
     // start polling metric values
+    _logger.LogInformation("Starting metric polling");
     var updateFrequency = _settings.GetValue("update_frequency", DefaultUpdateFrequencyMs);
     _scheduler.Interval(UpdateMetricValues, TimeSpan.FromMilliseconds(updateFrequency), InitialDelay);
   }

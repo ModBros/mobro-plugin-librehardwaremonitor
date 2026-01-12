@@ -20,5 +20,7 @@
   "settings.battery.desc": "Whether the battery should be monitored",
   "settings.battery.title": "Battery",
   "settings.delay.desc": "Optional delay before initializing and querying sensors (in seconds)",
-  "settings.delay.title": "Initialization delay"
+  "settings.delay.title": "Initialization delay",
+  "dependencies.pawnio.desc": "LibreHardwareMonitor uses PawnIO to read certain hardware sensors. Without this driver, some metrics will not be available.",
+  "dependencies.pawnio.title": "PawnIO"
 }

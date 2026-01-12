@@ -1,12 +1,11 @@
 using System;
 using LibreHardwareMonitor.Hardware;
-using MoBro.Plugin.LibreHardwareMonitor.Model;
 using MoBro.Plugin.SDK.Builders;
 using MoBro.Plugin.SDK.Enums;
 using MoBro.Plugin.SDK.Models.Categories;
 using MoBro.Plugin.SDK.Models.Metrics;
 
-namespace MoBro.Plugin.LibreHardwareMonitor.Extensions;
+namespace MoBro.Plugin.LibreHardwareMonitor.Libre;
 
 internal static class SensorExtensions
 {
@@ -85,6 +84,9 @@ internal static class SensorExtensions
         return CoreMetricType.Duration;
       case SensorType.Energy:
       case SensorType.Noise:
+      case SensorType.Timing:
+      case SensorType.Conductivity:
+      case SensorType.Humidity:
       default:
         return CoreMetricType.Numeric;
     }

@@ -1,6 +1,6 @@
 using LibreHardwareMonitor.Hardware;
 
-namespace MoBro.Plugin.LibreHardwareMonitor.Model;
+namespace MoBro.Plugin.LibreHardwareMonitor.Libre;
 
 internal readonly record struct Sensor(
   string Id,
