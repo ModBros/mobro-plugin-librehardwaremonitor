@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LibreHardwareMonitor.Hardware;
 using MoBro.Plugin.SDK.Builders;
 using MoBro.Plugin.SDK.Enums;
@@ -9,29 +10,65 @@ namespace MoBro.Plugin.LibreHardwareMonitor.Libre;
 
 internal static class SensorExtensions
 {
-  public static Metric AsMetric(this Sensor sensor)
+  private static readonly Dictionary<SensorType, CoreMetricType> MetricTypeMap = new()
   {
-    return MoBroItem
-      .CreateMetric()
-      .WithId(sensor.Id)
-      .WithLabel(sensor.Name)
-      .OfType(GetMetricType(sensor.SensorType))
-      .OfCategory(GetCategory(sensor.HardwareType))
-      .OfGroup(sensor.GroupId)
-      .Build();
-  }
+    { SensorType.Voltage, CoreMetricType.ElectricPotential },
+    { SensorType.Clock, CoreMetricType.Frequency },
+    { SensorType.Frequency, CoreMetricType.Frequency },
+    { SensorType.Temperature, CoreMetricType.Temperature },
+    { SensorType.Load, CoreMetricType.Usage },
+    { SensorType.Control, CoreMetricType.Usage },
+    { SensorType.Level, CoreMetricType.Usage },
+    { SensorType.Power, CoreMetricType.Power },
+    { SensorType.SmallData, CoreMetricType.Data },
+    { SensorType.Data, CoreMetricType.Data },
+    { SensorType.Throughput, CoreMetricType.DataFlow },
+    { SensorType.Fan, CoreMetricType.Rotation },
+    { SensorType.Factor, CoreMetricType.Multiplier },
+    { SensorType.Current, CoreMetricType.ElectricCurrent },
+    { SensorType.Flow, CoreMetricType.VolumeFlow },
+    { SensorType.TimeSpan, CoreMetricType.Duration }
+  };
 
-  public static Group AsGroup(this Sensor sensor)
+  private static readonly Dictionary<HardwareType, CoreCategory> HardwareCategoryMap = new()
   {
-    return MoBroItem.CreateGroup()
-      .WithId(sensor.GroupId)
-      .WithLabel(sensor.GroupName)
-      .Build();
-  }
+    { HardwareType.Cpu, CoreCategory.Cpu },
+    { HardwareType.GpuNvidia, CoreCategory.Gpu },
+    { HardwareType.GpuAmd, CoreCategory.Gpu },
+    { HardwareType.GpuIntel, CoreCategory.Gpu },
+    { HardwareType.Memory, CoreCategory.Ram },
+    { HardwareType.Storage, CoreCategory.Storage },
+    { HardwareType.Motherboard, CoreCategory.Mainboard },
+    { HardwareType.Network, CoreCategory.Network },
+    { HardwareType.Battery, CoreCategory.Battery }
+  };
 
-  public static MetricValue AsMetricValue(this Sensor sensor)
+  extension(Sensor sensor)
   {
-    return new MetricValue(sensor.Id, GetMetricValue(sensor));
+    public Metric AsMetric()
+    {
+      return MoBroItem
+        .CreateMetric()
+        .WithId(sensor.Id)
+        .WithLabel(sensor.Name)
+        .OfType(GetMetricType(sensor.SensorType))
+        .OfCategory(GetCategory(sensor.HardwareType))
+        .OfGroup(sensor.GroupId)
+        .Build();
+    }
+
+    public Group AsGroup()
+    {
+      return MoBroItem.CreateGroup()
+        .WithId(sensor.GroupId)
+        .WithLabel(sensor.GroupName)
+        .Build();
+    }
+
+    public MetricValue AsMetricValue()
+    {
+      return new MetricValue(sensor.Id, GetMetricValue(sensor));
+    }
   }
 
   private static object? GetMetricValue(in Sensor sensor)
@@ -52,72 +89,11 @@ internal static class SensorExtensions
 
   private static CoreMetricType GetMetricType(SensorType sensorType)
   {
-    switch (sensorType)
-    {
-      case SensorType.Voltage:
-        return CoreMetricType.ElectricPotential;
-      case SensorType.Clock:
-      case SensorType.Frequency:
-        return CoreMetricType.Frequency;
-      case SensorType.Temperature:
-        return CoreMetricType.Temperature;
-      case SensorType.Load:
-      case SensorType.Control:
-      case SensorType.Level:
-        return CoreMetricType.Usage;
-      case SensorType.Power:
-        return CoreMetricType.Power;
-      case SensorType.SmallData:
-      case SensorType.Data:
-        return CoreMetricType.Data;
-      case SensorType.Throughput:
-        return CoreMetricType.DataFlow;
-      case SensorType.Fan:
-        return CoreMetricType.Rotation;
-      case SensorType.Factor:
-        return CoreMetricType.Multiplier;
-      case SensorType.Current:
-        return CoreMetricType.ElectricCurrent;
-      case SensorType.Flow:
-        return CoreMetricType.VolumeFlow;
-      case SensorType.TimeSpan:
-        return CoreMetricType.Duration;
-      case SensorType.Energy:
-      case SensorType.Noise:
-      case SensorType.Timing:
-      case SensorType.Conductivity:
-      case SensorType.Humidity:
-      default:
-        return CoreMetricType.Numeric;
-    }
+    return MetricTypeMap.GetValueOrDefault(sensorType, CoreMetricType.Numeric);
   }
 
   private static CoreCategory GetCategory(HardwareType hardwareType)
   {
-    switch (hardwareType)
-    {
-      case HardwareType.Cpu:
-        return CoreCategory.Cpu;
-      case HardwareType.GpuNvidia:
-      case HardwareType.GpuAmd:
-      case HardwareType.GpuIntel:
-        return CoreCategory.Gpu;
-      case HardwareType.Memory:
-        return CoreCategory.Ram;
-      case HardwareType.Storage:
-        return CoreCategory.Storage;
-      case HardwareType.Motherboard:
-        return CoreCategory.Mainboard;
-      case HardwareType.Network:
-        return CoreCategory.Network;
-      case HardwareType.Battery:
-        return CoreCategory.Battery;
-      case HardwareType.SuperIO:
-      case HardwareType.Cooler:
-      case HardwareType.EmbeddedController:
-      case HardwareType.Psu:
-      default:
-        return CoreCategory.Miscellaneous;
-    }
+    return HardwareCategoryMap.GetValueOrDefault(hardwareType, CoreCategory.Miscellaneous);
   }
 }

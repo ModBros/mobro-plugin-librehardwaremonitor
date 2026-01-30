@@ -55,7 +55,7 @@ public class LibreHardwareMonitor : IDisposable
     return _computer.Hardware.SelectMany(h => GetSensors(h.HardwareType, h));
   }
 
-  private static IEnumerable<Sensor> GetSensors(HardwareType rootType, IHardware hardware)
+  private static List<Sensor> GetSensors(HardwareType rootType, IHardware hardware)
   {
     // first update the sensors information 
     hardware.Update();
