@@ -31,7 +31,7 @@ public class Plugin : IMoBroPlugin, IDisposable
     _service = service;
     _scheduler = scheduler;
     _logger = logger;
-    _libre = new Libre.LibreHardwareMonitor();
+    _libre = new Libre.LibreHardwareMonitor(logger);
   }
 
   public void Init()
@@ -42,7 +42,7 @@ public class Plugin : IMoBroPlugin, IDisposable
 
   private void InitLibre()
   {
-    // check PawnIO status 
+    // check PawnIO status
     _service.SetDependencyStatus("pawnio", PawnIo.GetStatus());
 
     // update LibreHardwareMonitor according to settings

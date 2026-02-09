@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using LibreHardwareMonitor.Hardware;
+using Microsoft.Extensions.Logging;
 using MoBro.Plugin.SDK.Models;
 using MoBro.Plugin.SDK.Models.Metrics;
 using MoBro.Plugin.SDK.Services;
 
 namespace MoBro.Plugin.LibreHardwareMonitor.Libre;
 
-public class LibreHardwareMonitor : IDisposable
+public class LibreHardwareMonitor(ILogger logger) : IDisposable
 {
   private static readonly Regex IdSanitationRegex = new(@"[^\w\.\-]", RegexOptions.Compiled);
+
+  private static readonly TimeSpan ReadErrorLogCooldown = TimeSpan.FromMinutes(5);
+  private readonly Dictionary<string, DateTimeOffset> _lastReadError = new();
 
   private readonly Computer _computer = new();
 
@@ -47,12 +51,53 @@ public class LibreHardwareMonitor : IDisposable
 
   public IEnumerable<MetricValue> GetMetricValues()
   {
-    return GetSensors().Select(s => s.AsMetricValue());
+    return GetSensors().Select(s =>
+    {
+      try
+      {
+        return s.AsMetricValue();
+      }
+      catch (Exception e)
+      {
+        // return an empty value if the sensor failed to read instead of crashing the plugin 
+        ReadFailed("Sensor", s.Id, e);
+        return new MetricValue(s.Id, null);
+      }
+    });
   }
 
   private IEnumerable<Sensor> GetSensors()
   {
-    return _computer.Hardware.SelectMany(h => GetSensors(h.HardwareType, h));
+    return _computer.Hardware.SelectMany(h =>
+    {
+      try
+      {
+        return GetSensors(h.HardwareType, h);
+      }
+      catch (Exception e)
+      {
+        // skip hardware that failed to read instead of crashing the plugin
+        ReadFailed(h.HardwareType.ToString(), h.Identifier.ToString(), e);
+        return [];
+      }
+    });
+  }
+
+  private void ReadFailed(string type, string id, Exception ex)
+  {
+    var now = DateTimeOffset.UtcNow;
+    lock (_lastReadError)
+    {
+      var key = type + id + ex.GetType().Name;
+      if (_lastReadError.TryGetValue(key, out var last) && now - last < ReadErrorLogCooldown)
+      {
+        return;
+      }
+
+      _lastReadError[key] = now;
+    }
+
+    logger.LogWarning(ex, "Failed to read {Type}: {Id}", type, id);
   }
 
   private static List<Sensor> GetSensors(HardwareType rootType, IHardware hardware)
