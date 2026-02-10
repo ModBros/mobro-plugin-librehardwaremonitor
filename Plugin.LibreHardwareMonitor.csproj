@@ -11,7 +11,7 @@
         <Title>MoBro LibreHardwareMonitor Plugin</Title>
         <Copyright>(C) ModBros KG 2026</Copyright>
         <PackageProjectUrl>https://mobro.app</PackageProjectUrl>
-        <VersionPrefix>1.1.0</VersionPrefix>
+        <VersionPrefix>1.1.1</VersionPrefix>
         <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
         <EnableDynamicLoading>true</EnableDynamicLoading>
